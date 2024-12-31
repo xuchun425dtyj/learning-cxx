@@ -1,5 +1,5 @@
 ﻿#include "../exercise.h"
-
+#include <cstring>
 // READ: 类模板 <https://zh.cppreference.com/w/cpp/language/class_template>
 
 template<class T>
@@ -10,7 +10,11 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        for (unsigned int i = 0; i < 4; i++) {
+            size *= shape_[i];
+        }
         data = new T[size];
+        std::memcpy(shape, shape_, 4 * sizeof(unsigned int));
         std::memcpy(data, data_, size * sizeof(T));
     }
     ~Tensor4D() {
@@ -28,6 +32,32 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        bool bc[4];
+        for (unsigned int i = 0; i < 4; i++) {
+           if( (bc[i] = shape[i] != others.shape[i])) {
+               ASSERT(others.shape[i] == 1, "Broadcast shape must be 1");
+           };
+        }
+        T *dst = this->data;
+        T *src = others.data;
+        T *ptr[4]{src};
+        for (unsigned int i = 0; i < shape[0]; ++i) {
+            if (bc[0]) src=ptr[0];
+            ptr[1] = src;
+            for (unsigned int j = 0; j < shape[1]; ++j) {
+                if (bc[1]) src=ptr[1];
+                ptr[2] = src;
+                for (unsigned int k = 0; k < shape[2]; ++k) {
+                    if (bc[2]) src=ptr[2];
+                    ptr[3] = src;
+                    for (unsigned int l = 0; l < shape[3]; ++l) {
+                        if (bc[3]) src=ptr[3];
+                        *dst++ += *src++;
+                    }
+                }
+            }
+
+        }
         return *this;
     }
 };

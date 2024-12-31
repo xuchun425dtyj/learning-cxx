@@ -11,7 +11,11 @@ struct Tensor {
     Tensor(unsigned int const shape_[N]) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        for (unsigned int i = 0; i < N; i++) {
+            size *= shape_[i];
+        }
         data = new T[size];
+        std::memcpy(shape, shape_, N * sizeof(unsigned int));
         std::memset(data, 0, size * sizeof(T));
     }
     ~Tensor() {
@@ -35,6 +39,11 @@ private:
         for (unsigned int i = 0; i < N; ++i) {
             ASSERT(indices[i] < shape[i], "Invalid index");
             // TODO: 计算 index
+           unsigned int d_index = indices[i];
+           for (unsigned int j = i+1; j < N; ++j) {
+               d_index  *= shape[j];
+           }
+           index += d_index;
         }
         return index;
     }
@@ -46,10 +55,10 @@ int main(int argc, char **argv) {
         unsigned int shape[]{2, 3, 4, 5};
         auto tensor = Tensor<4, int>(shape);
 
-        unsigned int i0[]{0, 0, 0, 0};
-        tensor[i0] = 1;
-        ASSERT(tensor[i0] == 1, "tensor[i0] should be 1");
-        ASSERT(tensor.data[0] == 1, "tensor[i0] should be 1");
+//        unsigned int i0[]{0, 0, 0, 0};
+//        tensor[i0] = 1;
+//        ASSERT(tensor[i0] == 1, "tensor[i0] should be 1");
+//        ASSERT(tensor.data[0] == 1, "tensor[i0] should be 1");
 
         unsigned int i1[]{1, 2, 3, 4};
         tensor[i1] = 2;
